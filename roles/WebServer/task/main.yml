@@ -7,6 +7,7 @@
       - libapache2-mod-php
       - nodejs
       - npm
+      - apache2  # Додати Apache пакет
     state: present
 
 - name: Встановити Composer глобально
@@ -64,3 +65,19 @@
   template:
     src: db_config.j2
     dest: /var/www/html/app-for-devops/.env
+
+- name: Налаштувати Apache веб-сервер для додатку
+  template:
+    src: apache-config.conf  # конфігураційний файл Apache
+    dest: /etc/apache2/sites-available/apache_config.conf
+  notify: Restart Apache
+
+- name: Увімкнути віртуальний хост Apache для додатку
+  command: a2ensite apache_config.conf
+  notify: Restart Apache
+
+handlers:
+  - name: Restart Apache
+    service:
+      name: apache2
+      state: restarted

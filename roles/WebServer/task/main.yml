@@ -14,7 +14,7 @@
     url: https://getcomposer.org/installer
     dest: /tmp/composer-installer.php
 - name: Запустити Composer installer
-    command: php /tmp/composer-installer.php --install-dir=/usr/local/bin --filename=composer
+  command: php /tmp/composer-installer.php --install-dir=/usr/local/bin --filename=composer
 
 - name: Клонувати репозиторій додатку
   git:

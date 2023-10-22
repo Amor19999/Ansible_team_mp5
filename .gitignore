@@ -1,2 +1,3 @@
 aws.pem
-host.ini
+hosts.ini
+hosts.txt

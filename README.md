@@ -10,5 +10,5 @@ The task is to write the `main.yml` Ansible playbook. This playbook should insta
 Here's an example of launching the playbook to install application on an Apache web server with a MariaDB database server:
 
 ```bash
-ansible-playbook main.yml --extra-vars "db_host=db.some.net db_name=app_db db_user=app_user db_pass=app_pass"
+ansible-playbook main.yaml --extra-vars "db_host=db.some.net db_name=app_db db_user=app_user db_pass=app_pass" -i hosts.ini"
 ```

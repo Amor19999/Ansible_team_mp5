@@ -68,7 +68,7 @@
 
 - name: Налаштувати Apache веб-сервер для додатку
   template:
-    src: apache-config.conf  # конфігураційний файл Apache
+    src: apache-config.j2  # конфігураційний файл Apache
     dest: /etc/apache2/sites-available/apache_config.conf
   notify: Restart Apache
 

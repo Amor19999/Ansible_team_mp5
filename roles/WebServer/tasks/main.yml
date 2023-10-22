@@ -1,14 +1,33 @@
 ---
-- name: Встановити необхідні пакети
+#tasks:
+ # Обновляем кеш репозиториев
+ # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
+- name: Update repo cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes 
+    cache_valid_time: 3600
+
+- name: Install nodejs and npm
   apt:
     name:
-      - php
-      - php-mysql
-      - libapache2-mod-php
+    - apache2  # Додати Apache пакет
+    - php
+    - php-mysql
+    - php-curl
+    - libapache2-mod-php
+    - php-xml 
+    - php-dom
+    pkg:
       - nodejs
       - npm
-      - apache2  # Додати Apache пакет
-    state: present
+
+#    state: present
+#when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
+- name: Restart Apache
+  service:
+      name: apache2
+      state: restarted
 
 - name: Встановити Composer глобально
   get_url:
@@ -23,6 +42,7 @@
     repo: 'https://github.com/Practical-DevOps/app-for-devops.git'
     dest: '/var/www/html/app-for-devops'
     clone: yes
+    force: yes 
 
 - name: Перейменувати .env.example в .env
   command:
@@ -30,8 +50,10 @@
     chdir: /var/www/html/app-for-devops
 
 - name: Встановити залежності Laravel через Composer
-  command:
-    cmd: composer install
+  become: yes
+#  become_user: sudo
+  command: sudo composer install
+  args:
     chdir: /var/www/html/app-for-devops
 
 - name: Запустити php artisan key:generate для Laravel
@@ -76,8 +98,9 @@
   command: a2ensite apache_config.conf
   notify: Restart Apache
 
-handlers:
-  - name: Restart Apache
-    service:
+#handlers:
+- name: Restart Apache
+  service:
       name: apache2
       state: restarted
+   

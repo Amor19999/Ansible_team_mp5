@@ -1,0 +1,10 @@
+[server]
+server_host ansible_host=178.212.243.237 ansible_port=2222
+
+[db]
+db_host ansible_host=178.212.243.237 ansible_port=2223
+
+[all:vars]
+ansible_user=borys
+ansible_password=dev0p$
+ansible_become_pass=dev0p$

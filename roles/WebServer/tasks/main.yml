@@ -59,12 +59,29 @@
     chdir: /var/www/html/app-for-devops
 
 ##########*********************************
+- name: Ensure correct permissions on composer directory
+  become: yes
+  file:
+    path: /var/www/html/app-for-devops/vendor/composer
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+    recurse: yes
 
-- name: Встановити залежності Laravel через Composer
-#  become: yes
-  command: 
-    cmd: sudo composer install
-    chdir: /var/www/html/app-for-devops
+
+- name: "Composer install"
+  become: yes
+  become_user: ubuntu
+  composer:
+    command: install
+    global_command: false
+    working_dir: /var/www/html/app-for-devops
+# - name: Встановити залежності Laravel через Composer
+# #  become: yes
+#   command: 
+#     cmd: sudo composer install
+#     chdir: /var/www/html/app-for-devops
 ###############***************************
 - name: Запустити php artisan key:generate для Laravel
   command:
@@ -77,7 +94,7 @@
   args:
     chdir: /var/www/html/app-for-devops
   environment:
-    DB_CONNECTION: db
+    DB_CONNECTION: mysql
     DB_HOST: "{{ db_host }}"
     DB_PORT: "3306"
     DB_DATABASE: "{{ db_name }}"

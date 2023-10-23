@@ -24,6 +24,15 @@
 
 #    state: present
 #when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
+
+#******************************************
+- name: Enable Apache mod_rewrite module
+#  become: yes
+  apache2_module:
+    name: rewrite
+    state: present
+#******************************************
+
 - name: Restart Apache
   service:
       name: apache2
@@ -49,42 +58,32 @@
     cmd: mv .env.example .env
     chdir: /var/www/html/app-for-devops
 
+##########*********************************
+
 - name: Встановити залежності Laravel через Composer
-  script: composer install --no-scripts --no-dev
-  when: repo.changed 
-
-
-
-  # composer:
-  #   command: install
-  #   working_dir: /var/www/html/app-for-devops
-  # environment:
-  #   COMPOSER_NO_INTERACTION: "1"   
-  #   COMPOSER_ALLOW_SUPERUSER: "1"
-
-    
-#  become_user: sudo
-  # command: sudo composer install
-  # args:
-  #   chdir: /var/www/html/app-for-devops
-
+#  become: yes
+  command: 
+    cmd: sudo composer install
+    chdir: /var/www/html/app-for-devops
+###############***************************
 - name: Запустити php artisan key:generate для Laravel
   command:
     cmd: php artisan key:generate
     chdir: /var/www/html/app-for-devops
-
+#****************************************************
 - name: Запустити php artisan migrate для Laravel
-#  command:
-  script: "php artisan config:cache"
+  command: "php artisan config:cache"
   when: repo.changed
-#  chdir: /var/www/html/app-for-devops
+  args:
+    chdir: /var/www/html/app-for-devops
   environment:
-    DB_CONNECTION: mysql
+    DB_CONNECTION: db
     DB_HOST: "{{ db_host }}"
-    DB_PORT: 3306
+    DB_PORT: "3306"
     DB_DATABASE: "{{ db_name }}"
     DB_USERNAME: "{{ db_user }}"
     DB_PASSWORD: "{{ db_pass }}"
+#***************************************************
 
 - name: Встановити фронтенд залежності через NPM
   command:

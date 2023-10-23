@@ -50,11 +50,23 @@
     chdir: /var/www/html/app-for-devops
 
 - name: Встановити залежності Laravel через Composer
-  become: yes
+  script: composer install --no-scripts --no-dev
+  when: repo.changed 
+
+
+
+  # composer:
+  #   command: install
+  #   working_dir: /var/www/html/app-for-devops
+  # environment:
+  #   COMPOSER_NO_INTERACTION: "1"   
+  #   COMPOSER_ALLOW_SUPERUSER: "1"
+
+    
 #  become_user: sudo
-  command: sudo composer install
-  args:
-    chdir: /var/www/html/app-for-devops
+  # command: sudo composer install
+  # args:
+  #   chdir: /var/www/html/app-for-devops
 
 - name: Запустити php artisan key:generate для Laravel
   command:
@@ -62,9 +74,10 @@
     chdir: /var/www/html/app-for-devops
 
 - name: Запустити php artisan migrate для Laravel
-  command:
-    cmd: php artisan migrate
-    chdir: /var/www/html/app-for-devops
+#  command:
+  script: "php artisan config:cache"
+  when: repo.changed
+#  chdir: /var/www/html/app-for-devops
   environment:
     DB_CONNECTION: mysql
     DB_HOST: "{{ db_host }}"

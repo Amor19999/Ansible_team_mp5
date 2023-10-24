@@ -18,15 +18,67 @@
     - libapache2-mod-php
     - php-xml 
     - php-dom
-    pkg:
+
+- name: Update apt and install required packages
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    update_cache: yes
+
+- name: Add NodeSource apt key
+  apt_key:
+    url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    state: present
+
+- name: Add NodeSource repositories for Node.js
+  apt_repository:
+    repo: "deb https://deb.nodesource.com/node_14.x {{ ansible_distribution_release }} main"
+    state: present
+
+- name: Install Node.js and npm
+  apt:
+    name:
       - nodejs
-      - npm
+    update_cache: yes
+
+#*********************************
+
+
+- name: Створити користувача ubuntu
+  user:
+    name: ubuntu
+    comment: "Ubuntu User"
+    shell: /bin/bash
+
+- name: Додати користувача ubuntu до групи root
+  user:
+    name: ubuntu
+    groups: root
+    append: yes  # Щоб не видаляти користувача з інших груп
+
+- name: Create app-for-devops directory
+  become: yes
+  command: mkdir -p /var/www/html/app-for-devops
+
+- name: Ensure correct permissions on composer directory
+  become: yes
+  file:
+    path: /var/www/html/app-for-devops/vendor/composer
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: '0755'
+    recurse: yes
+
 
 #    state: present
 #when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
 #******************************************
 - name: Enable Apache mod_rewrite module
-#  become: yes
+  become: yes
   apache2_module:
     name: rewrite
     state: present
@@ -58,27 +110,6 @@
     chdir: /var/www/html/app-for-devops
 
 ##########*********************************
-- name: Створити користувача ubuntu
-  user:
-    name: ubuntu
-    comment: "Ubuntu User"
-    shell: /bin/bash
-
-- name: Додати користувача ubuntu до групи root
-  user:
-    name: ubuntu
-    groups: root
-    append: yes  # Щоб не видаляти користувача з інших груп
-
-- name: Ensure correct permissions on composer directory
-  become: yes
-  file:
-    path: /var/www/html/app-for-devops/vendor/composer
-    state: directory
-    owner: ubuntu
-    group: ubuntu
-    mode: '0755'
-    recurse: yes
 
 #*********************************
 - name: "Composer install"
@@ -102,7 +133,7 @@
 - name: Запустити php artisan migrate для Laravel
   become: yes
   command: "php artisan config:cache"
-  when: repo.changed
+#  when: repo.changed
   args:
     chdir: /var/www/html/app-for-devops
   environment:

@@ -94,7 +94,7 @@
   args:
     chdir: /var/www/html/app-for-devops
   environment:
-    DB_CONNECTION: mysql
+    DB_CONNECTION: "mysql"
     DB_HOST: "{{ db_host }}"
     DB_PORT: "3306"
     DB_DATABASE: "{{ db_name }}"
@@ -112,10 +112,10 @@
     cmd: npm run build
     chdir: /var/www/html/app-for-devops
 
-- name: Налаштувати .env файл для Laravel
-  template:
-    src: db_config.j2
-    dest: /var/www/html/app-for-devops/.env
+# - name: Налаштувати .env файл для Laravel
+#   template:
+#     src: db_config.j2
+#     dest: /var/www/html/app-for-devops/.env
 
 - name: Налаштувати Apache веб-сервер для додатку
   template:

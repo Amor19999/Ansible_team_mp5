@@ -70,7 +70,7 @@
 
 
 - name: "Composer install"
-  become: yes
+#  become: yes
   become_user: ubuntu
   composer:
     command: install

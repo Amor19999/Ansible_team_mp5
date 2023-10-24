@@ -58,6 +58,18 @@
     chdir: /var/www/html/app-for-devops
 
 ##########*********************************
+- name: Створити користувача ubuntu
+  user:
+    name: ubuntu
+    comment: "Ubuntu User"
+    shell: /bin/bash
+
+- name: Додати користувача ubuntu до групи root
+  user:
+    name: ubuntu
+    groups: root
+    append: yes  # Щоб не видаляти користувача з інших груп
+
 - name: Ensure correct permissions on composer directory
   become: yes
   file:
@@ -68,7 +80,7 @@
     mode: '0755'
     recurse: yes
 
-
+#*********************************
 - name: "Composer install"
 #  become: yes
   become_user: ubuntu

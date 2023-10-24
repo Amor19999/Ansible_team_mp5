@@ -24,21 +24,6 @@
 
 #    state: present
 #when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
-
-   # Щоб мати права sudo
-- name: Створити користувача ubuntu
-  become: yes 
-  user:
-    name: ubuntu
-    comment: "Ubuntu User"
-    shell: /bin/bash
-
-- name: Додати користувача ubuntu до групи root
-  user:
-    name: ubuntu
-    groups: root
-    append: yes  # Щоб не видаляти користувача з інших груп
-
 #******************************************
 - name: Enable Apache mod_rewrite module
 #  become: yes
@@ -103,6 +88,7 @@
     chdir: /var/www/html/app-for-devops
 #****************************************************
 - name: Запустити php artisan migrate для Laravel
+  become: yes
   command: "php artisan config:cache"
   when: repo.changed
   args:

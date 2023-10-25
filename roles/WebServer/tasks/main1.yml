@@ -69,30 +69,11 @@
     path: /var/www/html/app-for-devops/vendor/composer
     state: directory
     owner: ubuntu
-    group: root
-    mode: '0755'
-    recurse: yes
-###############***************************
-- name: Встановіть правильні дозволи для директорії storage
-  become: yes
-  file:
-    path: "/var/www/html/app-for-devops/storage"
-    state: directory
-    owner: www-data
-    group: www-data
+    group: ubuntu
     mode: '0755'
     recurse: yes
 
-- name: Встановіть правильні дозволи для директорії bootstrap/cache
-  become: yes
-  file:
-    path: "/var/www/html/app-for-devops/bootstrap/cache"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
-    recurse: yes
-#******************************************
+
 #    state: present
 #when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
 #******************************************
@@ -123,16 +104,16 @@
     clone: yes
     force: yes 
 
-# - name: Перейменувати .env.example в .env
-#   command:
-#     cmd: mv .env.example .env
-#     chdir: /var/www/html/app-for-devops
+- name: Перейменувати .env.example в .env
+  command:
+    cmd: mv .env.example .env
+    chdir: /var/www/html/app-for-devops
 
 ##########*********************************
 
 #*********************************
 - name: "Composer install"
-# become: yes
+#  become: yes
   become_user: ubuntu
   composer:
     command: install
@@ -189,15 +170,9 @@
   command: a2ensite apache_config.conf
   notify: Restart Apache
 
-- name: Вимкнути дефолтний сайт Apache
-  become: yes
-  command: a2dissite 000-default.conf
-  notify: Restart Apache
-
-
-# #handlers:
-# - name: Restart Apache
-#   service:
-#       name: apache2
-#       state: restarted
+#handlers:
+- name: Restart Apache
+  service:
+      name: apache2
+      state: restarted
    

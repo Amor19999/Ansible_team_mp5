@@ -1,7 +1,4 @@
 ---
-#tasks:
- # Обновляем кеш репозиториев
- # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/apt_module.html
 - name: Update repo cache
   apt:
     update_cache: yes
@@ -11,7 +8,7 @@
 - name: Install nodejs and npm
   apt:
     name:
-    - apache2  # Додати Apache пакет
+    - apache2  
     - php
     - php-mysql
     - php-curl
@@ -46,7 +43,6 @@
 
 #*********************************
 
-
 - name: Створити користувача ubuntu
   user:
     name: ubuntu
@@ -57,18 +53,14 @@
   user:
     name: ubuntu
     groups: root
-    # owner: www-data
-    # group: www-data
-    append: yes  # Щоб не видаляти користувача з інших груп
+    append: yes  
 
 - name: Create app-for-devops directory
   become: yes
   command: mkdir -p /var/www/html
 
 #******************************************
-#    state: present
-#when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
-#******************************************
+
 - name: Enable Apache mod_rewrite module
   become: yes
   apache2_module:
@@ -102,14 +94,9 @@
     clone: yes
     force: yes 
 
-# - name: Перейменувати .env.example в .env
-#   command:
-#     cmd: mv .env.example .env
-#     chdir: /var/www/html/app-for-devops
-
 ##########*********************************
 - name: Змінити власника файлів і папок
-  become: yes  # Запустити команди для зміни власника з підвищеними привілегіями
+  become: yes  
   file:
     path: /var/www/html/app-for-devops
     owner: ubuntu
@@ -120,13 +107,13 @@
   file:
     path: /var/www/html/app-for-devops/vendor/composer
     state: directory
-    # owner: www-data
-    # group: www-data
+
     owner: ubuntu #user
     group: ubuntu #root
     mode: '0755'
     recurse: yes
 ###############***************************
+
 - name: Встановіть правильні дозволи для директорії storage
   become: yes
   file:
@@ -147,10 +134,6 @@
     mode: '0755'
     recurse: yes
 
-# - name: Копіювати файл з джерела до призначення
-#   copy:
-#     src: /var/www/html/app-for-devops/.env.example
-#     dest: /var/www/html/app-for-devops/.env
 - name: Перевірка наявності файла .env
   stat:
     path: /var/www/html/app-for-devops/.env
@@ -161,8 +144,8 @@
     src: /var/www/html/app-for-devops/.env.example
     dest: /var/www/html/app-for-devops/.env
   when: not env_file.stat.exists
-
 #*********************************
+
 - name: "Composer install"
  #become: yes
   become_user: ubuntu
@@ -170,21 +153,18 @@
     command: install
     global_command: false
     working_dir: /var/www/html/app-for-devops
-# - name: Встановити залежності Laravel через Composer
-#   become: yes
-#   command: 
-#     cmd: composer install
-#     chdir: /var/www/html/app-for-devops
+
 ###############***************************
+
 - name: Запустити php artisan key:generate для Laravel
   command:
     cmd: php artisan key:generate
     chdir: /var/www/html/app-for-devops
 #****************************************************
+
 - name: Запустити php artisan migrate для Laravel
   become: yes
   command: "php artisan config:cache"
-#  when: repo.changed
   args:
     chdir: /var/www/html/app-for-devops
   environment:
@@ -206,14 +186,9 @@
     cmd: npm run build
     chdir: /var/www/html/app-for-devops
 
-# - name: Налаштувати .env файл для Laravel
-#   template:
-#     src: db_config.j2
-#     dest: /var/www/html/app-for-devops/.env
-
 - name: Налаштувати Apache веб-сервер для додатку
   template:
-    src: apache-config.j2  # конфігураційний файл Apache
+    src: apache-config.j2  
     dest: /etc/apache2/sites-available/apache_config.conf
   notify: Restart Apache
 
@@ -225,11 +200,4 @@
   become: yes
   command: a2dissite 000-default.conf
   notify: Restart Apache
-
-
-# #handlers:
-# - name: Restart Apache
-#   service:
-#       name: apache2
-#       state: restarted
    

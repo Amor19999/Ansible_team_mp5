@@ -57,41 +57,14 @@
   user:
     name: ubuntu
     groups: root
+    # owner: www-data
+    # group: www-data
     append: yes  # Щоб не видаляти користувача з інших груп
 
 - name: Create app-for-devops directory
   become: yes
-  command: mkdir -p /var/www/html/app-for-devops
+  command: mkdir -p /var/www/html
 
-- name: Ensure correct permissions on composer directory
-  become: yes
-  file:
-    path: /var/www/html/app-for-devops/vendor/composer
-    state: directory
-    owner: ubuntu
-    group: root
-    mode: '0755'
-    recurse: yes
-###############***************************
-- name: Встановіть правильні дозволи для директорії storage
-  become: yes
-  file:
-    path: "/var/www/html/app-for-devops/storage"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
-    recurse: yes
-
-- name: Встановіть правильні дозволи для директорії bootstrap/cache
-  become: yes
-  file:
-    path: "/var/www/html/app-for-devops/bootstrap/cache"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
-    recurse: yes
 #******************************************
 #    state: present
 #when: ansible_distribution == 'Ubuntu'  # Ця дія працює лише для Ubuntu
@@ -116,6 +89,12 @@
 - name: Запустити Composer installer
   command: php /tmp/composer-installer.php --install-dir=/usr/local/bin --filename=composer
 
+- name: Ensure directory is removed
+  file:
+    path: /path/to/directory
+    state: absent
+
+
 - name: Клонувати репозиторій додатку
   git:
     repo: 'https://github.com/Practical-DevOps/app-for-devops.git'
@@ -129,19 +108,63 @@
 #     chdir: /var/www/html/app-for-devops
 
 ##########*********************************
+- name: Змінити власника файлів і папок
+  become: yes  # Запустити команди для зміни власника з підвищеними привілегіями
+  file:
+    path: /var/www/html/app-for-devops
+    owner: ubuntu
+    recurse: yes
+
+- name: Ensure correct permissions on composer directory
+  become: yes
+  file:
+    path: /var/www/html/app-for-devops/vendor/composer
+    state: directory
+    # owner: www-data
+    # group: www-data
+    owner: ubuntu #user
+    group: ubuntu #root
+    mode: '0755'
+    recurse: yes
+###############***************************
+- name: Встановіть правильні дозволи для директорії storage
+  become: yes
+  file:
+    path: "/var/www/html/app-for-devops/storage"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+    recurse: yes
+
+- name: Встановіть правильні дозволи для директорії bootstrap/cache
+  become: yes
+  file:
+    path: "/var/www/html/app-for-devops/bootstrap/cache"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+    recurse: yes
+
+- name: Копіювати файл з джерела до призначення
+  copy:
+    src: /var/www/html/app-for-devops/.env.example
+    dest: /var/www/html/app-for-devops/.env
+
 
 #*********************************
 - name: "Composer install"
-# become: yes
+ #become: yes
   become_user: ubuntu
   composer:
     command: install
     global_command: false
     working_dir: /var/www/html/app-for-devops
 # - name: Встановити залежності Laravel через Composer
-# #  become: yes
+#   become: yes
 #   command: 
-#     cmd: sudo composer install
+#     cmd: composer install
 #     chdir: /var/www/html/app-for-devops
 ###############***************************
 - name: Запустити php artisan key:generate для Laravel

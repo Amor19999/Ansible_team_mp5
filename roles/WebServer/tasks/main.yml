@@ -140,10 +140,11 @@
   register: env_file
 
 - name: Копіювати .env.example до .env (якщо немає .env)
+  when: not env_file.stat.exists
   copy:
     src: /var/www/html/app-for-devops/.env.example
     dest: /var/www/html/app-for-devops/.env
-  when: not env_file.stat.exists
+
 #*********************************
 
 - name: "Composer install"
